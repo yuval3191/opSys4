@@ -12,6 +12,7 @@
 #include "file.h"
 #include "stat.h"
 #include "proc.h"
+#include "fcntl.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -99,6 +100,47 @@ filestat(struct file *f, uint64 addr)
     return 0;
   }
   return -1;
+}
+
+// chaneg file offset
+int
+fileseek(struct file *f, int off, int whence)
+{
+  int r = 0;
+
+  if(f->type != FD_INODE)
+    return -1;
+
+  if (whence == SEEK_SET){
+    if (off < 0){
+      f->off = 0;
+    }
+    else
+      f->off = off;
+  }
+  else if (whence == SEEK_CUR){
+    if ((int)(f->off) + off < 0){
+      f->off = 0;
+    }
+    else
+      f->off = (int)(f->off) + off;
+  }
+  else{
+    r  = -1;
+  }
+
+  if (r == 0)
+  {
+    ilock(f->ip);
+    /* need to check if this is the right size*/
+    if (f->off > f->ip->size)
+    {
+      f->off = f->ip->size;
+    }
+    iunlock(f->ip);
+  }
+
+  return r;
 }
 
 // Read from file f.

@@ -80,6 +80,20 @@ sys_read(void)
 }
 
 uint64
+sys_seek(void)
+{
+  struct file *f;
+  int off;
+  int whence;
+
+  argint(1, &off);
+  argint(2, &whence);
+  if(argfd(0, 0, &f) < 0)
+    return -1;
+  return fileseek(f, off, whence);
+}
+
+uint64
 sys_write(void)
 {
   struct file *f;
