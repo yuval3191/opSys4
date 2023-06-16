@@ -199,8 +199,3 @@ test_seek(int print) {
   close(fd);
   return 1;
 }
-
-int main()
-{
-    return test_seek(1);
-}
